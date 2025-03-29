@@ -1,0 +1,10 @@
+services:
+  db:
+      image: postgres:latest
+      container_name: IC_TASKS
+      environment:
+        - POSTGRES_DB=IC
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=1234
+      ports:
+        - "5432:5432"
