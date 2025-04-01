@@ -17,6 +17,7 @@ SITE_URL = {
 
 def main():
     workingAttachments()
+    workingDataBase()
     
 
         
@@ -51,6 +52,12 @@ def workingAttachments():
 
 
 def workingDataBase(): 
+
+    TABLES = {
+        "OPERADORAS": "OPERADORAS",
+        "DEMONSTRACOES": "DEMONSTRACOES"
+    }
+   
     reponse = requests.get( SITE_URL["demonstracoesContabeis"] )
 
     parseContent = BeautifulSoup(reponse.text, "html.parser").find_all("a", href=True )
@@ -81,6 +88,65 @@ def workingDataBase():
     for csvItens in os.listdir(pathDemosntraceos):
         if ".csv" in csvItens:
             print(csvItens)
+    
+
+    pathOperadoras = os.path.join(DIRETORIO, "operadorasAtivas")
+    if not os.path.exists(pathOperadoras):
+        os.makedirs(pathOperadoras, exist_ok=True)
+
+    dowloadFiles( SITE_URL["operadorasAtivas"] , pathOperadoras)
+
+    mapColumnsOPeradoras = {
+        "Registro_ANS": "INTEGER",
+        "CNPJ": "VARCHAR(20)",
+        "Razao_Social": "VARCHAR(255)",
+        "Nome_Fantasia": "VARCHAR(255)",
+        "Modalidade": "VARCHAR(100)",
+        "Logradouro": "VARCHAR(255)",
+        "Numero": "VARCHAR(255)",
+        "Complemento": "VARCHAR(255)",
+        "Bairro": "VARCHAR(100)",
+        "Cidade": "VARCHAR(100)",
+        "UF": "VARCHAR(10)",
+        "CEP": "VARCHAR(20)",
+        "DDD": "VARCHAR(20)",
+        "Telefone": "VARCHAR(20)",
+        "Fax": "VARCHAR(20)",
+        "Endereco_eletronico": "VARCHAR(255)",
+        "Representante": "VARCHAR(255)",
+        "Cargo_Representante": "VARCHAR(100)",
+        "Regiao_de_Comercializacao": "FLOAT",
+        "Data_Registro_ANS": "DATE"
+    }
+
+    
+    # createTable(TABLES["OPERADORAS"], mapColumnsOPeradoras )
+
+
+    itemOperadoras = os.listdir(os.path.join(DIRETORIO,"operadorasAtivas"))[0]
+
+    extractData.uploadCSVToDatabase(os.path.join( DIRETORIO,"operadorasAtivas" ,itemOperadoras) , TABLES["OPERADORAS"])
+
+    mapColumnsSaldoOperadoras = {
+        "DATA": "DATE",
+        "REG_ANS": "INTEGER",
+        "CD_CONTA_CONTABIL": "INTEGER",
+        "DESCRICAO": "VARCHAR(255)",
+        "VL_SALDO_INICIAL": "DOUBLE PRECISION",
+        "VL_SALDO_FINAL": "DOUBLE PRECISION"
+    }
+
+    filesDemonstraceos = os.listdir(os.path.join(DIRETORIO,"demosntracoes"))
+    
+    # createTable(TABLES["DEMONSTRACOES"], mapColumnsSaldoOperadoras )
+
+    for i in filesDemonstraceos:
+        if ".csv" in i:
+            pathDemonstracoes =  os.path.join( DIRETORIO,"demosntracoes" ,i)
+
+            extractData.convertCSVDemonstracao( pathDemonstracoes)
+            
+            extractData.uploadCSVToDatabase(os.path.join( DIRETORIO,"demosntracoes" ,i), TABLES["DEMONSTRACOES"])
 
 main()
-# workingDataBase()
+
